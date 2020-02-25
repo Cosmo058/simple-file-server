@@ -1,11 +1,24 @@
-import React from "react";
+import React, { Component } from "react";
+import { Route, Switch } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles.css";
+import Header from "./components/Header/Header";
+import Upload from "./components/Upload/Upload";
 
-export default function App() {
-  return (
-    <div className="App">
-      <h1>Hello CodeSandbox</h1>
-      <h2>Start editing to see some magic happen!</h2>
-    </div>
-  );
+class App extends Component {
+  render() {
+    return (
+      <React.Fragment>
+        <Header />
+        <div className="container">
+          <Switch>
+            <Route path="/" component={Upload} exact />
+            <Route path="/about" />
+          </Switch>
+        </div>
+      </React.Fragment>
+    );
+  }
 }
+
+export default App;
