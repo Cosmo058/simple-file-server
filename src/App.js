@@ -12,7 +12,7 @@ class App extends Component {
         <Header />
         <div className="container">
           <Switch>
-            <Route path="/" component={Upload} exact />
+            <Route path="/" component={Upload} />
             <Route path="/about" />
           </Switch>
         </div>
