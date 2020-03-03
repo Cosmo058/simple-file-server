@@ -1,6 +1,17 @@
 import React, { Component } from "react";
-import axios from "axios";
+import B2 from "backblaze-b2";
 import "./styles.css";
+
+const b2 = new B2({
+  applicationKeyId: process.env.REACT_APP_KEY_ID,
+  applicationKey: process.env.REACT_APP_APPLICATION_KEY,
+  axios:{
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    }
+  }
+});
 
 export default class UploadForm extends Component {
   constructor(props) {
@@ -20,10 +31,32 @@ export default class UploadForm extends Component {
   };
 
   onSubmitHandler = () => {
-    const data = new FormData();
-    data.append("file", this.state.seletctedFiles);
-    axios.post("http://angelsv.com:9000/upload", { data }).then(res => {
-      console.log(res.statusText);
+    b2.authorize().then(()=>{
+      b2.getBucket({
+        bucketName: 'CosmoStorage'
+      }).then(buckets=>{
+        b2.getUploadUrl({
+          bucketId: buckets.data.buckets[0].bucketId
+        }).then(uploadUrl =>{
+          b2.uploadFile({
+            uploadUrl: uploadUrl.data.uploadUrl,
+            uploadAuthToken: uploadUrl.data.authorizationToken,
+            fileName: this.state.fileLabel,
+            data: this.state.seletctedFile.arrayBuffer,
+            contentLength: this.state.seletctedFile.size,
+          }).then(()=>{
+            console.log("File uploaded!");
+          }).catch(err=>{
+            console.error("uploadFile(): "+err);
+          });
+        }).catch(err=>{
+          console.error("getUploadUrl(): "+err);
+        });
+      }).catch(err=>{
+        console.error("getBucket(): "+err);
+      });
+    }).catch(err=>{
+      console.error("authorize(): "+err);
     });
   };
 
@@ -48,7 +81,7 @@ export default class UploadForm extends Component {
             </label>
           </div>
         </div>
-        <button className="btn btn-success submit">Submit</button>
+        <button className="btn btn-success submit" onClick={this.onSubmitHandler}>Submit</button>
       </div>
     );
   }
